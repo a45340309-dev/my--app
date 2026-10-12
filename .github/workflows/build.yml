@@ -14,29 +14,15 @@ jobs:
       - name: Unzip and Build
         run: |
           ls -la
-          # ZIP کو کھولو
-          if [ -f "remix-hollow.zip" ]; then
-            echo "Unzipping remix-hollow.zip..."
-            sudo apt-get install -y unzip
-            unzip -o remix-hollow.zip
-            ls -la
-          fi
-          
-          # اب جہاں پروجیکٹ ہے وہاں سے بلڈ کرو
-          if [ -d "remix-hollow" ]; then
-            cd remix-hollow
-          fi
-          
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug --no-daemon
-          else
-            gradle assembleDebug --no-daemon
-          fi
+          unzip -o remix-hollow.zip
+          ls -la
+          cd remix-hollow
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: |
-            **/app/build/outputs/apk/debug/*.apk
+          path: remix-hollow/**/build/outputs/apk/debug/*.apk
