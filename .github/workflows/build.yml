@@ -12,12 +12,34 @@ jobs:
           java-version: '17'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Build Debug APK
+      
+      - name: Find and Build APK
         run: |
-          cd remix-hollow
-          gradle assembleDebug --no-daemon
+          echo "Checking files..."
+          ls -la
+          echo "Finding gradle file..."
+          find . -type f -name "settings.gradle*" | head -n 5
+          
+          # اگر remix-hollow فولڈر ہے تو اس میں جاؤ ورنہ یہیں بناؤ
+          if [ -d "remix-hollow" ]; then
+            echo "Found remix-hollow folder, building inside it"
+            cd remix-hollow
+          else
+            echo "Building in root"
+          fi
+          
+          # gradlew ہے تو وہی استعمال کرو ورنہ gradle
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --no-daemon
+          else
+            gradle assembleDebug --no-daemon
+          fi
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: remix-hollow/app/build/outputs/apk/debug/*.apk
+          path: |
+            **/app/build/outputs/apk/debug/*.apk
+            remix-hollow/app/build/outputs/apk/debug/*.apk
