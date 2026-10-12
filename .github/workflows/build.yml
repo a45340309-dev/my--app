@@ -14,6 +14,7 @@ jobs:
         run: |
           unzip -o remix-hollow.zip
           chmod +x gradlew || true
+          ls -la
          ./gradlew assembleDebug || gradle assembleDebug
       - uses: actions/upload-artifact@v4
         with:
