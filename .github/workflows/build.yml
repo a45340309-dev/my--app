@@ -11,16 +11,11 @@ jobs:
           java-version: '17'
       - name: Build APK
         run: |
-          ls -la
-          unzip -o *.zip
-          ls -la
-          GRADLE_PATH=$(find . -name "gradlew" | head -n 1)
-          echo "Found gradlew at $GRADLE_PATH"
-          DIR=$(dirname "$GRADLE_PATH")
-          cd "$DIR"
-          chmod +x gradlew
-          ./gradlew assembleDebug
+              - name: Build APK
+           run: |
+             chmod +x gradlew
+             ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: APK-file
-          path: "**/app/build/outputs/apk/debug/*.apk"
+          path: app/build/outputs/apk/debug/*.apk
