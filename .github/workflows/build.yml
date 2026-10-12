@@ -5,30 +5,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-      
-      - name: Find and Build APK
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unzip and Build
         run: |
-          echo "Checking files..."
           ls -la
-          echo "Finding gradle file..."
-          find . -type f -name "settings.gradle*" | head -n 5
-          
-          # اگر remix-hollow فولڈر ہے تو اس میں جاؤ ورنہ یہیں بناؤ
-          if [ -d "remix-hollow" ]; then
-            echo "Found remix-hollow folder, building inside it"
-            cd remix-hollow
-          else
-            echo "Building in root"
+          # ZIP کو کھولو
+          if [ -f "remix-hollow.zip" ]; then
+            echo "Unzipping remix-hollow.zip..."
+            sudo apt-get install -y unzip
+            unzip -o remix-hollow.zip
+            ls -la
           fi
           
-          # gradlew ہے تو وہی استعمال کرو ورنہ gradle
+          # اب جہاں پروجیکٹ ہے وہاں سے بلڈ کرو
+          if [ -d "remix-hollow" ]; then
+            cd remix-hollow
+          fi
+          
           if [ -f "./gradlew" ]; then
             chmod +x ./gradlew
             ./gradlew assembleDebug --no-daemon
@@ -42,4 +40,3 @@ jobs:
           name: app-debug-apk
           path: |
             **/app/build/outputs/apk/debug/*.apk
-            remix-hollow/app/build/outputs/apk/debug/*.apk
