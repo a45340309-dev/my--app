@@ -11,11 +11,12 @@ jobs:
           java-version: '17'
       - name: Build APK
         run: |
-          unzip -o remix-hollow.zip
+          ls -la
+          unzip -o *.zip
           cd remix-hollow
           chmod +x gradlew
-           ./gradlew assembleDebug
+          ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: APK-file
-          path: remix-hollow/app/build/outputs/apk/debug/*.apk
+          path: "**/app/build/outputs/apk/debug/*.apk"
