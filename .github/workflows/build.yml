@@ -1,5 +1,7 @@
-name: build
+name: Build APK
+
 on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,12 +12,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Unzip and Build
+      - name: Build Debug APK
         run: |
-          unzip -o remix-hollow.zip
           chmod +x gradlew || true
-          ls -la
-         ./gradlew assembleDebug || gradle assembleDebug
+          ./gradlew assembleDebug || gradle assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
