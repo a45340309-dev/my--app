@@ -12,12 +12,27 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+      
       - name: Build Debug APK
         run: |
-          chmod +x gradlew || true
-          ./gradlew assembleDebug || gradle assembleDebug
+          ls -la
+          echo "--- Checking for zip ---"
+          if [ -f "remix-hollow.zip" ]; then unzip -o remix-hollow.zip; rm remix-hollow.zip; fi
+          if [ -f "holo.zip" ]; then unzip -o holo.zip; rm holo.zip; fi
+          ls -la
+          find . -type f -name "settings.gradle*" | head -n 5
+          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+          echo "Found gradlew at: $GRADLEW_PATH"
+          if [ -z "$GRADLEW_PATH" ]; then echo "gradlew not found, trying direct gradle"; gradle assembleDebug; exit 0; fi
+          DIR=$(dirname "$GRADLEW_PATH")
+          cd "$DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: |
             **/build/outputs/apk/debug/*.apk
+            **/app/build/outputs/apk/debug/*.apk
+            
