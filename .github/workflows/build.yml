@@ -1,38 +1,37 @@
 name: Build APK
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
-      
-      - name: Build Debug APK
-        run: |
-          ls -la
-          echo "--- Checking for zip ---"
-          if [ -f "remix-hollow.zip" ]; then unzip -o remix-hollow.zip; rm remix-hollow.zip; fi
-          if [ -f "holo.zip" ]; then unzip -o holo.zip; rm holo.zip; fi
-          ls -la
-          find . -type f -name "settings.gradle*" | head -n 5
-          GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
-          echo "Found gradlew at: $GRADLEW_PATH"
-          if [ -z "$GRADLEW_PATH" ]; then echo "gradlew not found, trying direct gradle"; gradle assembleDebug; exit 0; fi
-          DIR=$(dirname "$GRADLEW_PATH")
-          cd "$DIR"
-          chmod +x gradlew
-          ./gradlew assembleDebug
+      - uses: android-actions/setup-android@v3
 
-      - uses: actions/upload-artifact@v4
+      - name: Build APK
+        run: |
+          # unzip if zip exists
+          for f in $(find . -maxdepth 2 -name "*.zip"); do unzip -o "$f" -d .; rm "$f"; done
+          FILE=$(find . -name "settings.gradle*" | head -n 1)
+          cd $(dirname "$FILE")
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee build.log || true
+          echo "---BUILD LOG TAIL---"
+          tail -n 200 build.log
+
+      - name: Upload Logs and APK
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: build-output
           path: |
             **/build/outputs/apk/debug/*.apk
-            **/app/build/outputs/apk/debug/*.apk
+            **/build.log
+            **/app/build/outputs/logs/*.txt
             
